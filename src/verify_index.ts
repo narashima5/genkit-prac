@@ -1,0 +1,121 @@
+import 'dotenv/config';
+import { indexQuestions } from './index.js';
+
+
+async function testDescriptionGeneration() {
+    const q = [
+        {
+            "question": "Define Newton's First Law of Motion.",
+            "subject": "Physics",
+            "class": 9,
+            "year": 2023,
+            "topic": "Laws of Motion",
+            "mark": 2,
+            "difficultyLevel": "Easy",
+            "board": "CBSE",
+            "isMcq": false,
+            "options": null,
+            "containsImages": false,
+            "imageDescription": null,
+            "isEitherOr": false,
+            "otherQuestion": null,
+            "isRepeated": false
+        },
+        {
+            "question": "Which gas is most abundant in Earth's atmosphere?",
+            "subject": "Science",
+            "class": 8,
+            "year": 2024,
+            "topic": "Air and Atmosphere",
+            "mark": 1,
+            "difficultyLevel": "Easy",
+            "board": "CBSE",
+            "isMcq": true,
+            "options": ["Oxygen", "Nitrogen", "Carbon Dioxide", "Hydrogen"],
+            "containsImages": false,
+            "imageDescription": null,
+            "isEitherOr": false,
+            "otherQuestion": null,
+            "isRepeated": false
+        },
+        {
+            "question": "Solve: 3x + 7 = 25",
+            "subject": "Mathematics",
+            "class": 7,
+            "year": 2023,
+            "topic": "Linear Equations",
+            "mark": 3,
+            "difficultyLevel": "Medium",
+            "board": "CBSE",
+            "isMcq": false,
+            "options": null,
+            "containsImages": false,
+            "imageDescription": null,
+            "isEitherOr": false,
+            "otherQuestion": null,
+            "isRepeated": false
+        },
+        {
+            "question": "Identify the parts of a flower shown in the diagram.",
+            "subject": "Biology",
+            "class": 6,
+            "year": 2024,
+            "topic": "Reproduction in Plants",
+            "mark": 4,
+            "difficultyLevel": "Medium",
+            "board": "CBSE",
+            "isMcq": false,
+            "options": null,
+            "containsImages": true,
+            "imageDescription": "Labeled diagram of a flower",
+            "isEitherOr": false,
+            "otherQuestion": null,
+            "isRepeated": false
+        },
+        {
+            "question": "Explain the causes of the French Revolution.",
+            "subject": "History",
+            "class": 9,
+            "year": 2023,
+            "topic": "French Revolution",
+            "mark": 5,
+            "difficultyLevel": "Hard",
+            "board": "CBSE",
+            "isMcq": false,
+            "options": null,
+            "containsImages": false,
+            "imageDescription": null,
+            "isEitherOr": true,
+            "otherQuestion": "Describe the major events of the French Revolution.",
+            "isRepeated": false
+        },
+        {
+            "question": "Which of the following is a renewable resource?",
+            "subject": "Geography",
+            "class": 10,
+            "year": 2024,
+            "topic": "Resources",
+            "mark": 1,
+            "difficultyLevel": "Easy",
+            "board": "CBSE",
+            "isMcq": true,
+            "options": ["Coal", "Petroleum", "Solar Energy", "Natural Gas"],
+            "containsImages": false,
+            "imageDescription": null,
+            "isEitherOr": false,
+            "otherQuestion": null,
+            "isRepeated": false
+        }
+    ];
+
+    try {
+        // Genkit flows are callables. Pass the entire array of questions.
+        const result = await indexQuestions(q);
+        console.log("Result:", result);
+
+    } catch (e) {
+        console.error("CRITICAL ERROR invoking flow:", e);
+    }
+}
+
+testDescriptionGeneration();

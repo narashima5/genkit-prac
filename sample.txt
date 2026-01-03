@@ -93,22 +93,6 @@
     "image_description": null,
     "is_either_or": false,
     "other_question": null,
-    "is_repeated": true
-  },
-  {
-    "question": "Which of the following is a renewable resource?",
-    "subject": "Geography",
-    "class": 10,
-    "year": 2024,
-    "topic": "Resources",
-    "mark": 1,
-    "difficulty_level": "Easy",
-    "is_mcq": true,
-    "options": ["Coal", "Petroleum", "Solar Energy", "Natural Gas"],
-    "contains_images": false,
-    "image_description": null,
-    "is_either_or": false,
-    "other_question": null,
-    "is_repeated": true
+    "is_repeated": false
   }
 ]

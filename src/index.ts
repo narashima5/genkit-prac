@@ -2,13 +2,8 @@ import 'dotenv/config';
 import pg from 'pg';
 const { Pool } = pg;
 
-// import { Document } from 'genkit/retriever';
-// import { chunk } from 'llm-chunk';
-// import { readFile } from 'fs/promises';
-// import path from 'path';
-// import { PDFParse } from 'pdf-parse';
 import { googleAI } from '@genkit-ai/google-genai';
-import { genkit, z, type EmbedderReference } from 'genkit';
+import { genkit, z } from 'genkit';
 
 const ai = genkit({
     plugins: [
@@ -18,70 +13,6 @@ const ai = genkit({
         temperature: 0.8,
     }),
 });
-
-// async function extractTextFromPdf(filePath: string) {
-//     const pdfFile = path.resolve(filePath);
-//     const dataBuffer = await readFile(pdfFile);
-//     const parser = new PDFParse({ data: dataBuffer });
-//     const data = await parser.getText();
-//     return data.text;
-// }
-
-// export const menuPdfIndexer = { name: 'menuQA' } as any;
-
-// const chunkingConfig = {
-//     minLength: 1000,
-//     maxLength: 2000,
-//     splitter: 'sentence',
-//     overlap: 100,
-//     delimiters: '',
-// } as any;
-
-// export const indexMenu = ai.defineFlow(
-//     {
-//         name: 'indexMenu',
-//         inputSchema: z.object({ filePath: z.string().describe('PDF file path') }),
-//         outputSchema: z.object({
-//             success: z.boolean(),
-//             documentsIndexed: z.number(),
-//             error: z.string().optional(),
-//         }),
-//     },
-//     async ({ filePath }) => {
-//         try {
-//             filePath = path.resolve(filePath);
-
-//             // Read the pdf
-//             const pdfTxt = await ai.run('extract-text', () => extractTextFromPdf(filePath));
-
-//             // Divide the pdf text into segments
-//             const chunks = await ai.run('chunk-it', async () => chunk(pdfTxt, chunkingConfig));
-
-//             // Convert chunks of text into documents to store in the index.
-//             const documents = chunks.map((text: string) => {
-//                 return Document.fromText(text, { filePath });
-//             });
-
-//             // Add documents to the index
-//             await ai.index({
-//                 indexer: menuPdfIndexer,
-//                 documents,
-//             });
-
-//             return {
-//                 success: true,
-//                 documentsIndexed: documents.length,
-//             };
-//         } catch (err) {
-//             // For unexpected errors that throw exceptions
-//             return {
-//                 success: false,
-//                 documentsIndexed: 0,
-//                 error: err instanceof Error ? err.message : String(err),
-//             };
-//         }
-//     },
-// );
 
 const pool = new Pool({
     user: 'postgres',
@@ -158,11 +89,11 @@ export const retrieveContext = ai.defineFlow(
             const embeddingVector = JSON.stringify(firstEmbedding);
 
             const result = await pool.query(
-                `SELECT content FROM documents ORDER BY embedding <=> $1::vector LIMIT 5`,
+                `SELECT metadata FROM documents ORDER BY embedding <=> $1::vector LIMIT 5`,
                 [embeddingVector]
             );
 
-            return result.rows.map((row: any) => row.content);
+            return result.rows.map((row: any) => row.metadata.question);
         } catch (error) {
             console.error('Error retrieving context:', error);
             throw error;
@@ -210,24 +141,15 @@ export const indexQuestions = ai.defineFlow(
 
         for (const q of questions) {
             try {
-                // Generate descriptive text for embedding and content
-                let description = `Question: "${q.question}"\n`;
-                description += `This is a ${q.difficultyLevel} level ${q.subject} question for Class ${q.class} (${q.board} Board), from the year ${q.year}. `;
-                description += `It covers the topic "${q.topic}" and is worth ${q.mark} mark(s). `;
+                // Generate descriptive text using LLM
+                const { text: description } = await ai.generate({
+                    prompt: `Generate a detailed description for a question with the following metadata:
+${JSON.stringify(q, null, 2)}
 
-                if (q.isMcq && q.options) {
-                    description += `It is a Multiple Choice Question with options: ${q.options.join(', ')}. `;
-                } else {
-                    description += `It is a descriptive question. `;
-                }
-
-                if (q.containsImages && q.imageDescription) {
-                    description += `It includes an image described as: "${q.imageDescription}". `;
-                }
-
-                if (q.isRepeated) {
-                    description += `This question has appeared in previous exams.`;
-                }
+Instructions:
+- The description should be natural language, suitable for semantic search embedding.
+- Mention the difficulty, subject, class, board, year, topic, and marks.`,
+                });
 
                 const embedding = await ai.embed({
                     embedder: googleAI.embedder('gemini-embedding-001'),
@@ -249,6 +171,10 @@ export const indexQuestions = ai.defineFlow(
                 errors.push(`Failed to index "${q.question}": ${error instanceof Error ? error.message : String(error)}`);
             }
         }
+
+        const retrievedContext = await ai.run('retrieve-context', () => retrieveContext('ask me question aboout french revolution'));
+
+        console.log('Retrieved context:', retrievedContext);
 
         return { indexedCount, errors };
     }
