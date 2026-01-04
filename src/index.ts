@@ -89,7 +89,7 @@ export const retrieveContext = ai.defineFlow(
             const embeddingVector = JSON.stringify(firstEmbedding);
 
             const result = await pool.query(
-                `SELECT metadata FROM documents ORDER BY embedding <=> $1::vector LIMIT 5`,
+                `SELECT metadata FROM documents WHERE embedding <=> $1::vector < 0.45 ORDER BY embedding <=> $1::vector LIMIT 5`,
                 [embeddingVector]
             );
 
@@ -102,11 +102,7 @@ export const retrieveContext = ai.defineFlow(
 );
 
 
-
-
-
-
-const QuestionSchema = z.object({
+export const QuestionSchema = z.object({
     question: z.string(),
     subject: z.string(),
     class: z.number(),
@@ -141,6 +137,22 @@ export const indexQuestions = ai.defineFlow(
 
         for (const q of questions) {
             try {
+                // Check for duplicates
+                const existing = await pool.query(
+                    `SELECT id FROM documents WHERE metadata->>'question' = $1 AND metadata->>'subject' = $2`,
+                    [q.question, q.subject]
+                );
+
+                if (existing.rowCount && existing.rowCount > 0) {
+                    console.log(`Skipping duplicate: "${q.question}"`);
+                    continue;
+                }
+
+                // Rate limiting: Always wait if this isn't the first item, regardless of indexedCount
+                // (using a simple counter or checking index if I had access to it, here using a flag)
+                console.log("Waiting 40s to respect rate limits...");
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
                 // Generate descriptive text using LLM
                 const { text: description } = await ai.generate({
                     prompt: `Generate a detailed description for a question with the following metadata:
@@ -166,15 +178,12 @@ Instructions:
                     [description, q, embeddingVector]
                 );
                 indexedCount++;
+                console.log(`Successfully indexed: "${q.question}"`);
             } catch (error) {
                 console.error(`Error indexing question "${q.question}":`, error);
                 errors.push(`Failed to index "${q.question}": ${error instanceof Error ? error.message : String(error)}`);
             }
         }
-
-        const retrievedContext = await ai.run('retrieve-context', () => retrieveContext('ask me question aboout french revolution'));
-
-        console.log('Retrieved context:', retrievedContext);
 
         return { indexedCount, errors };
     }

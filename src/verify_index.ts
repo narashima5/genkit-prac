@@ -1,9 +1,9 @@
-import 'dotenv/config';
-import { indexQuestions } from './index.js';
+import { genkit, z } from 'genkit';
+import { indexQuestions, QuestionSchema } from './index.js';
 
 
 async function testDescriptionGeneration() {
-    const q = [
+    const q: z.infer<typeof QuestionSchema>[] = [
         {
             "question": "Define Newton's First Law of Motion.",
             "subject": "Physics",
@@ -105,13 +105,166 @@ async function testDescriptionGeneration() {
             "isEitherOr": false,
             "otherQuestion": null,
             "isRepeated": false
+        },
+        {
+            "question": "State Newton's Second Law of Motion.",
+            "subject": "Physics",
+            "class": 9,
+            "year": 2024,
+            "topic": "LawsOfMotion",
+            "mark": 2,
+            "difficultyLevel": "Easy",
+            "board": "CBSE",
+            "isMcq": false,
+            "options": null,
+            "containsImages": false,
+            "imageDescription": null,
+            "isEitherOr": false,
+            "otherQuestion": null,
+            "isRepeated": false
+        },
+        {
+            "question": "A body of mass 5 kg is acted upon by a force of 10 N. Find its acceleration.",
+            "subject": "Physics",
+            "class": 9,
+            "year": 2024,
+            "topic": "LawsOfMotion",
+            "mark": 3,
+            "difficultyLevel": "Medium",
+            "board": "CBSE",
+            "isMcq": false,
+            "options": null,
+            "containsImages": false,
+            "imageDescription": null,
+            "isEitherOr": false,
+            "otherQuestion": null,
+            "isRepeated": false
+        },
+        {
+            "question": "Which law explains the action-reaction principle?",
+            "subject": "Physics",
+            "class": 9,
+            "year": 2024,
+            "topic": "LawsOfMotion",
+            "mark": 1,
+            "difficultyLevel": "Easy",
+            "board": "CBSE",
+            "isMcq": true,
+            "options": ["First Law", "Second Law", "Third Law", "Law of Gravitation"],
+            "containsImages": false,
+            "imageDescription": null,
+            "isEitherOr": false,
+            "otherQuestion": null,
+            "isRepeated": false
+        },
+        {
+            "question": "Find the value of x if 2x + 5 = 17.",
+            "subject": "Mathematics",
+            "class": 7,
+            "year": 2024,
+            "topic": "LinearEquations",
+            "mark": 2,
+            "difficultyLevel": "Easy",
+            "board": "CBSE",
+            "isMcq": false,
+            "options": null,
+            "containsImages": false,
+            "imageDescription": null,
+            "isEitherOr": false,
+            "otherQuestion": null,
+            "isRepeated": false
+        },
+        {
+            "question": "Solve: 4x - 9 = 3x + 5.",
+            "subject": "Mathematics",
+            "class": 7,
+            "year": 2024,
+            "topic": "LinearEquations",
+            "mark": 3,
+            "difficultyLevel": "Medium",
+            "board": "CBSE",
+            "isMcq": false,
+            "options": null,
+            "containsImages": false,
+            "imageDescription": null,
+            "isEitherOr": false,
+            "otherQuestion": null,
+            "isRepeated": false
+        },
+        {
+            "question": "Which of the following is a linear equation?",
+            "subject": "Mathematics",
+            "class": 7,
+            "year": 2024,
+            "topic": "LinearEquations",
+            "mark": 1,
+            "difficultyLevel": "Easy",
+            "board": "CBSE",
+            "isMcq": true,
+            "options": ["x² + 3 = 0", "2x + 5 = 0", "xy = 6", "x³ = 8"],
+            "containsImages": false,
+            "imageDescription": null,
+            "isEitherOr": false,
+            "otherQuestion": null,
+            "isRepeated": false
+        },
+        {
+            "question": "Name the process by which plants prepare their food.",
+            "subject": "Biology",
+            "class": 7,
+            "year": 2024,
+            "topic": "Photosynthesis",
+            "mark": 1,
+            "difficultyLevel": "Easy",
+            "board": "CBSE",
+            "isMcq": false,
+            "options": null,
+            "containsImages": false,
+            "imageDescription": null,
+            "isEitherOr": false,
+            "otherQuestion": null,
+            "isRepeated": false
+        },
+        {
+            "question": "Which gas is released during photosynthesis?",
+            "subject": "Biology",
+            "class": 7,
+            "year": 2024,
+            "topic": "Photosynthesis",
+            "mark": 1,
+            "difficultyLevel": "Easy",
+            "board": "CBSE",
+            "isMcq": true,
+            "options": ["Oxygen", "Carbon dioxide", "Nitrogen", "Hydrogen"],
+            "containsImages": false,
+            "imageDescription": null,
+            "isEitherOr": false,
+            "otherQuestion": null,
+            "isRepeated": false
+        },
+        {
+            "question": "Explain the role of chlorophyll in photosynthesis.",
+            "subject": "Biology",
+            "class": 7,
+            "year": 2024,
+            "topic": "Photosynthesis",
+            "mark": 4,
+            "difficultyLevel": "Medium",
+            "board": "CBSE",
+            "isMcq": false,
+            "options": null,
+            "containsImages": false,
+            "imageDescription": null,
+            "isEitherOr": true,
+            "otherQuestion": "Describe the process of photosynthesis with a chemical equation.",
+            "isRepeated": false
         }
     ];
 
     try {
         // Genkit flows are callables. Pass the entire array of questions.
         const result = await indexQuestions(q);
-        console.log("Result:", result);
+        console.log("Result:", result.indexedCount);
 
     } catch (e) {
         console.error("CRITICAL ERROR invoking flow:", e);
