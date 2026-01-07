@@ -80,6 +80,9 @@ export const retrieveContext = ai.defineFlow(
     },
     async (query) => {
         try {
+            if (!query || query.trim() === '') {
+                return [];
+            }
             const embedding = await ai.embed({
                 embedder: googleAI.embedder('gemini-embedding-001'),
                 content: query,

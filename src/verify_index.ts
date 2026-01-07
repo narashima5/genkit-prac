@@ -1,4 +1,4 @@
-import { genkit, z } from 'genkit';
+import { z } from 'genkit';
 import { indexQuestions, QuestionSchema } from './index.js';
 
 
